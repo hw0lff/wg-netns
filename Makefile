@@ -2,7 +2,6 @@ CONFIG_DIR = /etc
 SHELL=/bin/bash
 
 install:
-	@echo You must be root to install
 	mkdir -p $(CONFIG_DIR)/wg-netns
 	cp wg-netns.py /usr/bin/wg-netns
 	chmod 0755 /usr/bin/wg-netns

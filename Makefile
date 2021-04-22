@@ -3,7 +3,7 @@ SHELL=/bin/bash
 
 install:
 	@echo You must be root to install
-	mkdir $(CONFIG_DIR)/wg-netns
+	mkdir -p $(CONFIG_DIR)/wg-netns
 	cp wg-netns.py /usr/bin/wg-netns
 	chmod 0755 /usr/bin/wg-netns
 	cp wg-netns@.service /usr/lib/systemd/system/wg-netns@.service

@@ -56,7 +56,7 @@ You can find two examples below.
   "pre-down": "some shell command executed in netns",
   "post-down": "some shell command executed in netns",
   "no-netns-post-up": "some shell command that is *not executed* in netns",
-  "no-resolvconf-write": "true", // explicitly disable writing a resolv.conf file
+  "no-resolvconf-write": "true",
   "interfaces": [
     {
       "name": "wg-site-a",
@@ -95,6 +95,11 @@ You can find two examples below.
   ]
 }
 ~~~
+
+### Notes
+setting `no-resolvconf-write` to `true` explicitly disables writing a resolv.conf file
+
+### Examples
 
 Now it's time to setup your new network namespace and all associated wireguard interfaces.
 

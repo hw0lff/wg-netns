@@ -132,6 +132,13 @@ Or do whatever else you want.
 ### System Service
 
 You can find a `wg-quick@.service` equivalent at [wg-netns@.service](./wg-netns@.service).
+Place your config in `/etc/wg-netns/` and start the service:
+
+(Assuming the config file is named example.json)
+
+~~~bash
+systemctl start wg-netns@example.service
+~~~
 
 ### Port Forwarding
 

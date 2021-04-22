@@ -56,7 +56,7 @@ def setup_action(path):
     namespace = profile_read(path)
     try:
         namespace_setup(namespace)
-        #print('post ns setup')
+        print('post ns setup')
     except BaseException:
         namespace_teardown(namespace, check=False)
         raise
@@ -73,14 +73,14 @@ def profile_read(path):
 
 
 def namespace_setup(namespace):
-    # print('ns setup')
+    print('ns setup')
     if namespace.get('pre-up'):
         ip_netns_shell(namespace['pre-up'], netns=namespace)
     namespace_create(namespace)
-    # print('ns setup post create and pre resolv')
+    print('ns setup post create and pre resolv')
     if str.lower(namespace.get('no-resolvconf-write', '')) != 'true':
         namespace_resolvconf_write(namespace)
-    # print('ns setup pre for int')
+    print('ns setup pre for int')
     for interface in namespace['interfaces']:
         interface_setup(interface, namespace)
     if namespace.get('post-up'):
@@ -132,7 +132,7 @@ def namespace_resolvconf_delete(namespace):
 
 
 def interface_setup(interface, namespace):
-    #print('if setup')
+    print('if setup')
     interface_create(interface, namespace)
     interface_configure_wireguard(interface, namespace)
     for peer in interface['peers']:
@@ -143,7 +143,7 @@ def interface_setup(interface, namespace):
 
 
 def interface_create(interface, namespace):
-    #print("if create", interface['name'])
+    print("if create", interface['name'])
     ip('link', 'add', interface['name'], 'type', 'wireguard')
     ip('link', 'set', interface['name'], 'netns', namespace['name'])
 

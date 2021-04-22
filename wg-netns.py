@@ -77,11 +77,14 @@ def namespace_setup(namespace):
     if namespace.get('pre-up'):
         ip_netns_shell(namespace['pre-up'], netns=namespace)
     namespace_create(namespace)
-    namespace_resolvconf_write(namespace)
+    if str.lower(namespace.get('no-resolvconf-write', '')) != 'true':
+        namespace_resolvconf_write(namespace)
     for interface in namespace['interfaces']:
         interface_setup(interface, namespace)
     if namespace.get('post-up'):
         ip_netns_shell(namespace['post-up'], netns=namespace)
+    if namespace.get('no-netns-post-up'):
+        run(namespace['no-netns-post-up'])
 
 
 def namespace_create(namespace):

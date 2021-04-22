@@ -51,10 +51,12 @@ You can find two examples below.
 {
   "name": "ns-example",
   "dns-server": ["10.10.10.1", "10.10.10.2"],
-  "pre-up": "some shell command",
-  "post-up": "some shell command",
-  "pred-own": "some shell command",
-  "post-down": "some shell command",
+  "pre-up": "some shell command executed in netns",
+  "post-up": "some shell command executed in netns",
+  "pre-down": "some shell command executed in netns",
+  "post-down": "some shell command executed in netns",
+  "no-netns-post-up": "some shell command that is *not executed* in netns",
+  "no-resolvconf-write": "true", // explicitly disable writing a resolv.conf file
   "interfaces": [
     {
       "name": "wg-site-a",

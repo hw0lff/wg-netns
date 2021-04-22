@@ -12,10 +12,11 @@ Requirements:
 - `ip` from `iproute2`
 - `wg` from `wireguard-tools`
 
-Just download the script and make it executable.
+Have a look at the Makefile to see where it is installed.
+Just run:
 
 ~~~ bash
-mkdir -p ~/.local/bin/ && curl -o ~/.local/bin/wg-netns https://raw.githubusercontent.com/dadevel/wg-netns/master/wg-netns.py && chmod 0755 ~/.local/bin/wg-netns
+make install
 ~~~
 
 ## Usage

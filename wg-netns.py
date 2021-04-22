@@ -6,9 +6,9 @@ import os
 import subprocess
 import sys
 
-NETNS_CONFIG_DIR = '/etc/netns'
+NETNS_CONFIG_DIR = Path('/etc/netns')
 DEBUG_LEVEL = 0
-SHELL = '/bin/sh'
+SHELL = Path('/bin/sh')
 
 
 def main(args):
@@ -21,7 +21,7 @@ def main(args):
         epilog=(
             'environment variables:\n'
             f'  NETNS_CONFIG_DIR    network namespace config directory, default: {NETNS_CONFIG_DIR}\n'
-            f'  DEBUG_LEVEL         print stack traces, default: {DEBUG_LEVEL}\n'
+            f'  DEBUG_LEVEL         print stack traces, 0 or 1, default: {DEBUG_LEVEL}\n'
             f'  SHELL               program for execution of shell hooks, default: {SHELL}\n'
         ),
     )
@@ -56,9 +56,7 @@ def setup_action(path):
     namespace = profile_read(path)
     try:
         namespace_setup(namespace)
-    except KeyboardInterrupt:
-        namespace_teardown(namespace, check=False)
-    except Exception as e:
+    except BaseException:
         namespace_teardown(namespace, check=False)
         raise
 
@@ -93,17 +91,20 @@ def namespace_create(namespace):
 
 
 def namespace_resolvconf_write(namespace):
-    content = '\n'.join(f'nameserver {server}' for server in namespace['dns-server'])
-    if content:
-        NETNS_CONFIG_DIR.joinpath(namespace['name']).mkdir(parents=True, exist_ok=True)
-        NETNS_CONFIG_DIR.joinpath(namespace['name']).joinpath('resolv.conf').write_text(content)
+    if namespace.get('dns-server'):
+        content = '\n'.join(f'nameserver {server}' for server in namespace['dns-server'])
+        if content:
+            NETNS_CONFIG_DIR.joinpath(namespace['name']).mkdir(parents=True, exist_ok=True)
+            NETNS_CONFIG_DIR.joinpath(namespace['name']).joinpath('resolv.conf').write_text(content)
 
 
 def namespace_teardown(namespace, check=True):
     if namespace.get('pre-down'):
         ip_netns_shell(namespace['pre-down'], netns=namespace)
     for interface in namespace['interfaces']:
-        interface_teardown(interface, namespace)
+        if check_for_interface_in_namespace(interface, namespace):
+            # remove only existing interfaces
+            interface_teardown(interface, namespace)
     namespace_delete(namespace)
     namespace_resolvconf_delete(namespace)
     if namespace.get('post-down'):
@@ -115,11 +116,11 @@ def namespace_delete(namespace, check=True):
 
 
 def namespace_resolvconf_delete(namespace):
-    path = NETNS_CONFIG_DIR/namespace['name']/'resolv.conf'
-    if path.exists():
-        path.unlink()
+    path = f"{NETNS_CONFIG_DIR}/{namespace['name']}/resolv.conf"
+    if os.path.exists(path):
+        os.unlink(path)
     try:
-        NETNS_CONFIG_DIR.rmdir()
+        os.rmdir(NETNS_CONFIG_DIR)
     except OSError:
         pass
 
@@ -163,6 +164,19 @@ def interface_create_routes(interface, namespace):
 def interface_teardown(interface, namespace, check=True):
     ip('-n', namespace['name'], 'link', 'set', interface['name'], 'down', check=check)
     ip('-n', namespace['name'], 'link', 'delete', interface['name'], check=check)
+
+
+def check_for_interface_in_namespace(interface, namespace, check=True):
+    """
+    checks the presence of given interface and returns True if it is present
+    """
+    interfaces_json = ip('-br', '-j', '-n', namespace['name'], 'link', 'list', check=check, capture=True)
+    interfaces = json.loads(interfaces_json)
+    for ip_interface in interfaces:
+        if ip_interface['ifname'] == interface:
+            return True
+
+    return False
 
 
 def peer_setup(peer, interface, namespace):

@@ -99,6 +99,7 @@ You can find two examples below.
 
 ### Notes
 setting `no-resolvconf-write` to `true` explicitly disables writing a resolv.conf file
+and therefore specifying `dns-server` unnecessary. Both are just listed for the sake of completeness.
 
 ### Examples
 
